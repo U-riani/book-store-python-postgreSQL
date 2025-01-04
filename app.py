@@ -49,10 +49,11 @@ def index():
 
 @app.route('/create/', methods=['POST'])
 def create():
-    title = request.json.get('title')
-    author = request.json.get('author')
-    pages_num = request.json.get('pages_num', type=int)
-    review = request.json.get('review')
+    data = request.get_json()  # Use get_json() to parse JSON
+    title = data.get('title')
+    author = data.get('author')
+    pages_num = data.get('pages_num', type=int)
+    review = data.get('review')
 
     if not title or not author or not pages_num or not review:
         return jsonify({"error": "All fields are required"}), 400
