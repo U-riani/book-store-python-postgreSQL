@@ -76,7 +76,7 @@ def create():
             cur.close()
             conn.close()
 
-    # return render_template('create.html')
+    return render_template('create.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
