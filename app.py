@@ -18,7 +18,7 @@ def get_db_connection():
         return conn
     except psycopg2.Error as e:
         print(f"Error connecting to the database: {e}")
-        return None
+        return None 
 
 @app.route('/')
 def index():
