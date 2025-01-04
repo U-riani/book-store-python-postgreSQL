@@ -1,5 +1,5 @@
 import psycopg2
-from flask import Flask, jsonify, request, url_for, redirect, render_template
+from flask import Flask, jsonify, request, redirect, url_for, render_template
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -17,7 +17,7 @@ def get_db_connection():
         return conn
     except psycopg2.Error as e:
         print(f"Error connecting to the database: {e}")
-        return None 
+        return None
 
 @app.route('/')
 def index():
@@ -41,38 +41,37 @@ def index():
         cur.close()
         conn.close()
 
-@app.route('/create/', methods=['GET', 'POST'])
+@app.route('/create/', methods=['POST'])
 def create():
-    if request.method == 'POST':
-        title = request.form.get('title')
-        author = request.form.get('author')
-        pages_num = request.form.get('pages_num', type=int)
-        review = request.form.get('review')
+    title = request.form.get('title')
+    author = request.form.get('author')
+    pages_num = request.form.get('pages_num', type=int)
+    review = request.form.get('review')
 
-        if not title or not author or not pages_num or not review:
-            return jsonify({"error": "All fields are required"}), 400
+    if not title or not author or not pages_num or not review:
+        return jsonify({"error": "All fields are required"}), 400
 
-        conn = get_db_connection()
+    conn = get_db_connection()
 
-        if not conn:
-            return jsonify({"error": "Database connection failed"}), 500
+    if not conn:
+        return jsonify({"error": "Database connection failed"}), 500
 
-        cur = conn.cursor()
+    cur = conn.cursor()
 
-        try:
-            insert_script = '''INSERT INTO books (title, author, pages_num, review) VALUES (%s, %s, %s, %s);'''
-            insert_value = (title, author, pages_num, review)
-            cur.execute(insert_script, insert_value)
-            conn.commit()
-            return redirect(url_for('index'))
-        except psycopg2.Error as e:
-            print(f"Error inserting into database: {e}")
-            return jsonify({"error": "Error inserting data into database"}), 500
-        finally:
-            cur.close()
-            conn.close()
+    try:
+        insert_script = '''INSERT INTO books (title, author, pages_num, review) VALUES (%s, %s, %s, %s);'''
+        insert_value = (title, author, pages_num, review)
+        cur.execute(insert_script, insert_value)
+        conn.commit()
+        return jsonify({"message": "Book created successfully"}), 201
+    except psycopg2.Error as e:
+        print(f"Error inserting into database: {e}")
+        return jsonify({"error": "Error inserting data into database"}), 500
+    finally:
+        cur.close()
+        conn.close()
 
-    return render_template('create.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# Entry point for Vercel
+def handler(event, context):
+    from flask import jsonify
+    return app(environ=event, start_response=context)
