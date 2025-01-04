@@ -1,4 +1,3 @@
-import os
 import psycopg2
 from flask import Flask, jsonify, request, url_for, redirect, render_template
 from flask_cors import CORS
@@ -42,8 +41,6 @@ def index():
         cur.close()
         conn.close()
 
-    # return render_template('index.html', books = books)
-
 @app.route('/create/', methods=['GET', 'POST'])
 def create():
     if request.method == 'POST':
@@ -51,7 +48,6 @@ def create():
         author = request.form.get('author')
         pages_num = request.form.get('pages_num', type=int)
         review = request.form.get('review')
-
 
         if not title or not author or not pages_num or not review:
             return jsonify({"error": "All fields are required"}), 400
@@ -68,7 +64,7 @@ def create():
             insert_value = (title, author, pages_num, review)
             cur.execute(insert_script, insert_value)
             conn.commit()
-            return redirect(url_for('/'))
+            return redirect(url_for('index'))
         except psycopg2.Error as e:
             print(f"Error inserting into database: {e}")
             return jsonify({"error": "Error inserting data into database"}), 500
@@ -80,4 +76,3 @@ def create():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
