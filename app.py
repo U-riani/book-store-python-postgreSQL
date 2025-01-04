@@ -1,18 +1,24 @@
+import os
 import psycopg2
-from flask import Flask, jsonify, request, redirect, url_for, render_template
+from flask import Flask, jsonify, request
 from flask_cors import CORS
+from config import Config
 
 app = Flask(__name__)
 CORS(app)
 
+# Load configuration
+app.config.from_object(Config)
+
 def get_db_connection():
+    db_config = app.config['DATABASE']
     try:
         conn = psycopg2.connect(
-            host='monorail.proxy.rlwy.net',
-            database='railway',
-            user='postgres',
-            password='uCvSdWUYewpxUAqxuQFocMlYkfQWVzJB',
-            port=38750
+            host=db_config['host'],
+            database=db_config['database'],
+            user=db_config['user'],
+            password=db_config['password'],
+            port=db_config['port']
         )
         return conn
     except psycopg2.Error as e:
@@ -43,10 +49,10 @@ def index():
 
 @app.route('/create/', methods=['POST'])
 def create():
-    title = request.form.get('title')
-    author = request.form.get('author')
-    pages_num = request.form.get('pages_num', type=int)
-    review = request.form.get('review')
+    title = request.json.get('title')
+    author = request.json.get('author')
+    pages_num = request.json.get('pages_num', type=int)
+    review = request.json.get('review')
 
     if not title or not author or not pages_num or not review:
         return jsonify({"error": "All fields are required"}), 400
@@ -71,7 +77,5 @@ def create():
         cur.close()
         conn.close()
 
-# Entry point for Vercel
-def handler(event, context):
-    from flask import jsonify
-    return app(environ=event, start_response=context)
+if __name__ == '__main__':
+    app.run(debug=app.config['DEBUG'])
