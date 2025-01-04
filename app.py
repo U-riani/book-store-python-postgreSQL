@@ -21,7 +21,6 @@ def get_db_connection():
         return None
 
 @app.route('/')
-
 def index():
     conn = get_db_connection()
     if not conn:
@@ -69,7 +68,7 @@ def create():
             insert_value = (title, author, pages_num, review)
             cur.execute(insert_script, insert_value)
             conn.commit()
-            return redirect(url_for('index'))
+            return redirect(url_for('/'))
         except psycopg2.Error as e:
             print(f"Error inserting into database: {e}")
             return jsonify({"error": "Error inserting data into database"}), 500
@@ -77,7 +76,7 @@ def create():
             cur.close()
             conn.close()
 
-    return render_template('create.html')
+    # return render_template('create.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
