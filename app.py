@@ -50,10 +50,17 @@ def index():
 @app.route('/create/', methods=['POST'])
 def create():
     data = request.get_json()  # Use get_json() to parse JSON
+    data = dict(data)
+    print('reciebved data: ', data)
+    print('data type', type(data))
     title = data.get('title')
     author = data.get('author')
-    pages_num = data.get('pages_num', type=int)
+    pages_num = int(data.get('pages_num'))
     review = data.get('review')
+    # title = data['title']
+    # author = data['author']
+    # pages_num = int(data['pages_num'])
+    # review = data['review']
 
     if not title or not author or not pages_num or not review:
         return jsonify({"error": "All fields are required"}), 400
@@ -61,6 +68,7 @@ def create():
     conn = get_db_connection()
 
     if not conn:
+        print('conn problem')
         return jsonify({"error": "Database connection failed"}), 500
 
     cur = conn.cursor()
